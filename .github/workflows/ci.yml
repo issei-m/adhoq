@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.allow_fail || false }}
+
+    container:
+      image: ${{ matrix.ruby == 'head' && 'rubylang/ruby:master-nightly-bullseye' || format('ruby:{0}', matrix.ruby) }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['2.4', '2.5', '2.6', '2.7', 'head']
+        gemfile:
+          - gemfiles/Gemfile-rails-5.1.x
+          - gemfiles/Gemfile-rails-5.2.x
+          - gemfiles/Gemfile-rails-6.0.x
+          - gemfiles/Gemfile-rails-edge
+        exclude:
+          - ruby: '2.4'
+            gemfile: gemfiles/Gemfile-rails-6.0.x
+          - ruby: '2.4'
+            gemfile: gemfiles/Gemfile-rails-edge
+        include:
+          - ruby: head
+            gemfile: gemfiles/Gemfile-rails-5.1.x
+            allow_fail: true
+          - ruby: head
+            gemfile: gemfiles/Gemfile-rails-5.2.x
+            allow_fail: true
+          - ruby: head
+            gemfile: gemfiles/Gemfile-rails-6.0.x
+            allow_fail: true
+          - ruby: head
+            gemfile: gemfiles/Gemfile-rails-edge
+            allow_fail: true
+          - ruby: '2.5'
+            gemfile: gemfiles/Gemfile-rails-edge
+            allow_fail: true
+          - ruby: '2.6'
+            gemfile: gemfiles/Gemfile-rails-edge
+            allow_fail: true
+          - ruby: '2.7'
+            gemfile: gemfiles/Gemfile-rails-edge
+            allow_fail: true
+
+    env:
+      RAILS_ENV: test
+      BUNDLE_GEMFILE: ${{ matrix.gemfile }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fix apt sources for old Debian
+        run: |
+          apt-get update -qq 2>/dev/null || {
+            sed -i 's|deb.debian.org|archive.debian.org|g' /etc/apt/sources.list
+            sed -i 's|security.debian.org|archive.debian.org/debian-security|g' /etc/apt/sources.list
+            sed -i '/-updates/d' /etc/apt/sources.list
+            apt-get update -qq
+          }
+
+      - name: Install system dependencies
+        run: apt-get install -y -qq libsqlite3-dev chromium chromium-driver
+
+      - name: Bundle install
+        run: bundle install --jobs=4
+
+      - name: Run migrations
+        run: bundle exec rake db:migrate
+
+      - name: Run specs
+        run: bundle exec rake spec

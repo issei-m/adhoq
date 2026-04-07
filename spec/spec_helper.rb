@@ -4,7 +4,7 @@ require_relative 'dummy/config/environment'
 require 'rspec/rails'
 
 require 'capybara/rspec'
-require 'capybara/poltergeist'
+require 'selenium-webdriver'
 require 'database_cleaner'
 require 'factory_bot_rails'
 require 'pry-byebug'
@@ -12,7 +12,15 @@ require 'pry-byebug'
 Rails.backtrace_cleaner.remove_silencers!
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f }
 
-Capybara.default_driver = :poltergeist
+Capybara.register_driver :headless_chromium do |app|
+  options = Selenium::WebDriver::Chrome::Options.new
+  options.binary = '/usr/bin/chromium'
+  options.add_argument('--headless')
+  options.add_argument('--no-sandbox')
+  options.add_argument('--disable-dev-shm-usage')
+  Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
+end
+Capybara.default_driver = :headless_chromium
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
