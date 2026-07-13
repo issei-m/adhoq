@@ -14,6 +14,10 @@ Gem::Specification.new do |s|
   s.description = 'Rails engine to generate instant reports from adhoc SQL query.'
   s.license     = "MIT"
 
+  s.metadata = {
+    'rubygems_mfa_required' => 'true'
+  }
+
   s.files = Dir["{app,config,db,lib}/**/*", "LICENSE.txt", "Rakefile", "README.md"]
 
   s.add_dependency "rails", ">= 5.1"
@@ -22,19 +26,20 @@ Gem::Specification.new do |s|
   s.add_dependency 'csv'
   s.add_dependency 'fog-aws', '>= 1.4'
   s.add_dependency 'fog-local', '~> 0.3'
-  s.add_dependency 'font-awesome-sass', '>= 4.2'
+  s.add_dependency 'font-awesome-sass', '~> 4.7'
   s.add_dependency 'jquery-rails'
-  s.add_dependency 'sassc-rails'
+  s.add_dependency 'sass-rails'
   s.add_dependency 'active_decorator'
   s.add_dependency 'rouge'
 
-  s.add_development_dependency 'capybara', '~> 2.4.3'
+  s.add_development_dependency 'capybara', '>= 3.0'
   s.add_development_dependency 'database_cleaner'
-  s.add_development_dependency 'factory_bot_rails', '~> 4.11.1'
+  s.add_development_dependency 'factory_bot_rails', '>= 4.11'
   s.add_development_dependency 'launchy'
-  s.add_development_dependency 'poltergeist', '~> 1.6.0'
   s.add_development_dependency 'pry-byebug'
+  s.add_development_dependency 'puma'
   s.add_development_dependency 'rspec-rails'
+  s.add_development_dependency 'selenium-webdriver', '>= 3.0'
   s.add_development_dependency 'simple_xlsx_reader'
   s.add_development_dependency 'sqlite3', '>= 1.4'
   s.add_development_dependency 'tapp'
